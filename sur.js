@@ -88,8 +88,34 @@
     shaderSet.program = program;
   };
 
+  Sur.bakeProgramParameters = function(gl, shaderSet) {
+    var parameters = [
+      ['attributes', gl.ACTIVE_ATTRIBUTES, 'Attrib'],
+      ['uniforms', gl.ACTIVE_UNIFORMS, 'Uniform'],
+    ];
+    var program = shaderSet.program;
+
+    _.each(parameters, function(parameter) {
+      var parameterCount = gl.getProgramParameter(program, parameter[1]);
+
+      shaderSet[parameter[0]] = _.zipObject(
+        _.times(parameterCount, function(count) {
+          var parameterName = gl['getActive' + parameter[2]](
+            program, count
+          ).name;
+          var parameterValue = gl['get' + parameter[2] + 'Location'](
+            program, parameterName
+          );
+
+          return [parameterName, parameterValue];
+        })
+      );
+    });
+  };
+
   /**
-   * Compiles a set of related shaders and links a program
+   * Compiles a set of related shaders, links a program, and extracts it's
+   * parameters
    */
   Sur.compileShaderSet = function(gl, shaderSet) {
     if (!_.isMatch(_.keys(shaderSet), Sur.SCRIPT_TYPES)) {
@@ -107,6 +133,7 @@
     });
 
     Sur.linkProgram(gl, shaderSet);
+    Sur.bakeProgramParameters(gl, shaderSet);
   };
 
   Sur.compileShaderSets = function(gl, shaderSets) {
