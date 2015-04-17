@@ -30,16 +30,16 @@
   Sur.VERTEX_SHADER_TYPE = 'vertex-shader';
   Sur.FRAGMENT_SHADER_TYPE = 'fragment-shader';
 
+  Sur.SCRIPT_TYPES = [Sur.VERTEX_SHADER_TYPE, Sur.FRAGMENT_SHADER_TYPE];
+
   /**
    * Fetch shaders from the document, grouping them into sets by program name
    */
   Sur.fetchShaders = function() {
-    var scriptTypes = [Sur.VERTEX_SHADER_TYPE, Sur.FRAGMENT_SHADER_TYPE];
-
     return _.chain($('script')).
       filter(function(script) {
         // Filter out any non-shader scripts
-        return _.contains(scriptTypes, script.type);
+        return _.contains(Sur.SCRIPT_TYPES, script.type);
       }).
       reduce(function(result, script) {
         var name = script.dataset.name;
@@ -92,17 +92,16 @@
    * Compiles a set of related shaders and links a program
    */
   Sur.compileShaderSet = function(gl, shaderSet) {
-    var scriptTypes = [Sur.VERTEX_SHADER_TYPE, Sur.FRAGMENT_SHADER_TYPE];
-    var shaderTypes = [gl.VERTEX_SHADER, gl.FRAGMENT_SHADER];
-
-    if (!_.isMatch(_.keys(shaderSet), scriptTypes)) {
+    if (!_.isMatch(_.keys(shaderSet), Sur.SCRIPT_TYPES)) {
       throw new Error(
         'Missing shader! Shader sets require both a vertex and a fragment ' +
         'shader'
       );
     }
 
-    _.each(_.zip(scriptTypes, shaderTypes), function(type) {
+    var shaderTypes = [gl.VERTEX_SHADER, gl.FRAGMENT_SHADER];
+
+    _.each(_.zip(Sur.SCRIPT_TYPES, shaderTypes), function(type) {
       var shaderId = Sur.compileShader(gl, shaderSet[type[0]].text, type[1]);
       shaderSet[type[0]].shader = shaderId;
     });
