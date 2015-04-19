@@ -1,17 +1,10 @@
-(function() {
+;(function() {
 
   // SurJS - Simple Unobtrusive Rasterization
   // Author: Brandon DeRosier 2015
 
   function Sur(canvas, initShaders) {
     initShaders = initShaders || true;
-
-    if (!
-      ((typeof _) === 'function') &&
-      ((typeof $) === 'function')
-    ) {
-      throw new Error('Sur requires Lodash/UnderscoreJS and jQuery');
-    }
 
     this.canvas = canvas;
     this.gl = canvas.getContext('webgl') ||
@@ -36,7 +29,7 @@
    * Fetch shaders from the document, grouping them into sets by program name
    */
   Sur.fetchShaders = function() {
-    return _.chain($('script')).
+    return _.chain(document.getElementsByTagName('script')).
       filter(function(script) {
         // Filter out any non-shader scripts
         return _.contains(Sur.SCRIPT_TYPES, script.type);
@@ -67,7 +60,7 @@
 
     if (!gl.getShaderParameter(result, gl.COMPILE_STATUS)) {
       throw new Error(
-        "Shader compilation error. " + gl.getShaderInfoLog(result)
+        "Shader compilation error; " + gl.getShaderInfoLog(result)
       );
     }
 
@@ -82,7 +75,7 @@
     gl.linkProgram(program);
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      throw new Error("Program link error. " + gl.getProgramInfoLog(program));
+      throw new Error("Program link error; " + gl.getProgramInfoLog(program));
     }
 
     shaderSet.program = program;
