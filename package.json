@@ -6,9 +6,6 @@
   "directories": {
     "test": "tests"
   },
-  "dependencies": {
-    "servedir": "^1.0.0"
-  },
   "devDependencies": {
     "servedir": "^1.0.0"
   },

@@ -18,9 +18,11 @@
   "license": "MIT",
   "ignore": [
     "vendor",
+    "node_modules",
     ".bowerrc",
     ".gitignore",
-    "tests"
+    "tests",
+    "package.json"
   ],
   "dependencies": {
     "jquery": "~2.1.3",
