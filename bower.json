@@ -17,10 +17,17 @@
   ],
   "license": "MIT",
   "ignore": [
-    "bower_components"
+    "vendor",
+    ".bowerrc",
+    ".gitignore",
+    "tests"
   ],
   "dependencies": {
     "jquery": "~2.1.3",
     "lodash": "~3.7.0"
+  },
+  "devDependencies": {
+    "blanket": "~1.1.5",
+    "qunit": "~1.18.0"
   }
 }
