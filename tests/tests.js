@@ -5,7 +5,7 @@ QUnit.module('basic construction', {
 });
 
 QUnit.test('environment checks', function(assert) {
-  assert.strictEqual(S.name, Sur.name, 'Sur and S have the same name');
+  assert.ok(_.isFunction(Sur), 'Sur is a function');
 });
 
 QUnit.test('construct Sur object with initShaders=false', function(assert) {
