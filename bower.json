@@ -23,9 +23,11 @@
     ".gitignore",
     "tests",
     "package.json"
+    "examples"
   ],
   "dependencies": {
-    "lodash": "~3.7.0"
+    "lodash": "~3.7.0",
+    "gl-matrix": "~2.2.1"
   },
   "devDependencies": {
     "blanket": "~1.1.5",
