@@ -1,8 +1,30 @@
+/**
+ * @license
+ * sur 0.0.0 <https://github.com/bdero/sur/>
+ * Copyright 2015 Brandon DeRosier
+ * Available under MIT license <https://github.com/bdero/sur/blob/master/LICENSE.md>
+ */
 ;(function() {
 
-  // SurJS - Simple Unobtrusive Rasterization
-  // Author: Brandon DeRosier 2015
-
+  /**
+   * Creates a `Sur` object which initializes a WebGL context and keeps track
+   * of WebGL state for a given canvas object.
+   *
+   * @name Sur
+   * @constructor
+   * @param {Object} canvas - The canvas element from which to initialize a
+   *  WebGL context.
+   * @param {boolean} [initShaders=true] Whether or not to fetch, compile, link,
+   *  and gather metadata about shader programs.
+   * @returns {Object} Returns the new `Sur` instance.
+   * @example
+   *
+   * var canvas = document.getElementById('#canvas');
+   * var sur = new Sur(canvas);
+   *
+   * _.keys(sur.shaderSets);
+   * // => ['myFirstShaderProgram', 'mySecondShaderProgram']
+   */
   function Sur(canvas, initShaders) {
     initShaders = initShaders || true;
 
@@ -20,9 +42,16 @@
     }
   }
 
+  /** The name used to identify vertex shaders. */
   Sur.VERTEX_SHADER_TYPE = 'vertex-shader';
+
+  /** The name used to identify fragment shaders. */
   Sur.FRAGMENT_SHADER_TYPE = 'fragment-shader';
 
+  /**
+   * Array containing the script type identifiers of vertex and fragment
+   * shaders.
+   */
   Sur.SCRIPT_TYPES = [Sur.VERTEX_SHADER_TYPE, Sur.FRAGMENT_SHADER_TYPE];
 
   /**
@@ -140,8 +169,5 @@
   };
 
   window.Sur = Sur;
-  if (!window.hasOwnProperty('S')) {
-    window.S = Sur;
-  }
 
 })();

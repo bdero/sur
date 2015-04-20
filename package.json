@@ -7,6 +7,7 @@
     "test": "tests"
   },
   "devDependencies": {
+    "jsdoc": "^3.3.0-beta3",
     "servedir": "^1.0.0"
   },
   "scripts": {
