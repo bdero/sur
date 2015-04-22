@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+
+  <canvas id="canvas" width="500" height="500">
+    Your browser doesn't support the canvas element.
+  </canvas>
+
+  <!-- Dependencies -->
+  <script src="../../vendor/lodash/lodash.min.js"></script>
+  <script type="text/javascript" src="../../sur.js"></script>
+
+
+  <!-- Shaders -->
+  <script type="vertex-shader" data-name="test">
+    attribute vec4 aPosition;
+
+    void main() {
+      gl_Position = aPosition;
+      gl_PointSize = 10.0;
+    }
+  </script>
+  <script type="fragment-shader" data-name="test">
+    precision mediump float;
+    uniform vec4 uFragColor;
+
+    void main() {
+      gl_FragColor = uFragColor;
+    }
+  </script>
+
+
+  <!-- Demo -->
+  <script>
+    var sur = new Sur(document.getElementById('canvas'));
+  </script>
+
+</body>
+</html>
