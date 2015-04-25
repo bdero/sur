@@ -1,0 +1,32 @@
+{
+  "name": "sur",
+  "version": "0.0.0",
+  "description": "Simple Unobtrusive Rasterization\"",
+  "main": "sur.js",
+  "directories": {
+    "test": "tests"
+  },
+  "devDependencies": {
+    "jsdoc": "^3.3.0-beta3",
+    "servedir": "^1.0.0"
+  },
+  "scripts": {
+    "test": "echo \"NAVIGATE TO: http://localhost:8000/tests/specrunner.html?coverage\"; ./node_modules/.bin/serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bdero/sur.git"
+  },
+  "keywords": [
+    "webgl",
+    "rasterization",
+    "helper",
+    "library"
+  ],
+  "author": "Brandon DeRosier <x@bdero.me>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bdero/sur/issues"
+  },
+  "homepage": "https://github.com/bdero/sur"
+}

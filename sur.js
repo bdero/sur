@@ -1,17 +1,32 @@
-(function() {
+/**
+ * @license
+ * sur 0.0.0 <https://github.com/bdero/sur/>
+ * Copyright 2015 Brandon DeRosier
+ * Available under MIT license <https://github.com/bdero/sur/blob/master/LICENSE.md>
+ */
+;(function() {
 
-  // SurJS - Simple Unobtrusive Rasterization
-  // Author: Brandon DeRosier 2015
-
+  /**
+   * Creates a `Sur` object which initializes a WebGL context and keeps track
+   * of WebGL state for a given canvas object.
+   *
+   * @name Sur
+   * @constructor
+   * @param {Object} canvas - The canvas element from which to initialize a
+   *  WebGL context.
+   * @param {boolean} [initShaders=true] Whether or not to fetch, compile, link,
+   *  and gather metadata about shader programs.
+   * @returns {Object} Returns the new `Sur` instance.
+   * @example
+   *
+   * var canvas = document.getElementById('#canvas');
+   * var sur = new Sur(canvas);
+   *
+   * _.keys(sur.shaderSets);
+   * // => ['myFirstShaderProgram', 'mySecondShaderProgram']
+   */
   function Sur(canvas, initShaders) {
     initShaders = initShaders || true;
-
-    if (!
-      ((typeof _) === 'function') &&
-      ((typeof $) === 'function')
-    ) {
-      throw new Error('Sur requires Lodash/UnderscoreJS and jQuery');
-    }
 
     this.canvas = canvas;
     this.gl = canvas.getContext('webgl') ||
@@ -27,19 +42,26 @@
     }
   }
 
+  /** The name used to identify vertex shaders. */
   Sur.VERTEX_SHADER_TYPE = 'vertex-shader';
+
+  /** The name used to identify fragment shaders. */
   Sur.FRAGMENT_SHADER_TYPE = 'fragment-shader';
+
+  /**
+   * Array containing the script type identifiers of vertex and fragment
+   * shaders.
+   */
+  Sur.SCRIPT_TYPES = [Sur.VERTEX_SHADER_TYPE, Sur.FRAGMENT_SHADER_TYPE];
 
   /**
    * Fetch shaders from the document, grouping them into sets by program name
    */
   Sur.fetchShaders = function() {
-    var scriptTypes = [Sur.VERTEX_SHADER_TYPE, Sur.FRAGMENT_SHADER_TYPE];
-
-    return _.chain($('script')).
+    return _.chain(document.getElementsByTagName('script')).
       filter(function(script) {
         // Filter out any non-shader scripts
-        return _.contains(scriptTypes, script.type);
+        return _.contains(Sur.SCRIPT_TYPES, script.type);
       }).
       reduce(function(result, script) {
         var name = script.dataset.name;
@@ -67,7 +89,7 @@
 
     if (!gl.getShaderParameter(result, gl.COMPILE_STATUS)) {
       throw new Error(
-        "Shader compilation error. " + gl.getShaderInfoLog(result)
+        "Shader compilation error; " + gl.getShaderInfoLog(result)
       );
     }
 
@@ -82,32 +104,58 @@
     gl.linkProgram(program);
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      throw new Error("Program link error. " + gl.getProgramInfoLog(program));
+      throw new Error("Program link error; " + gl.getProgramInfoLog(program));
     }
 
     shaderSet.program = program;
   };
 
+  Sur.bakeProgramParameters = function(gl, shaderSet) {
+    var parameters = [
+      ['attributes', gl.ACTIVE_ATTRIBUTES, 'Attrib'],
+      ['uniforms', gl.ACTIVE_UNIFORMS, 'Uniform'],
+    ];
+    var program = shaderSet.program;
+
+    _.each(parameters, function(parameter) {
+      var parameterCount = gl.getProgramParameter(program, parameter[1]);
+
+      shaderSet[parameter[0]] = _.zipObject(
+        _.times(parameterCount, function(count) {
+          var parameterName = gl['getActive' + parameter[2]](
+            program, count
+          ).name;
+          var parameterValue = gl['get' + parameter[2] + 'Location'](
+            program, parameterName
+          );
+
+          return [parameterName, parameterValue];
+        })
+      );
+    });
+  };
+
   /**
-   * Compiles a set of related shaders and links a program
+   * Compiles a set of related shaders, links a program, and extracts it's
+   * parameters
    */
   Sur.compileShaderSet = function(gl, shaderSet) {
-    var scriptTypes = [Sur.VERTEX_SHADER_TYPE, Sur.FRAGMENT_SHADER_TYPE];
-    var shaderTypes = [gl.VERTEX_SHADER, gl.FRAGMENT_SHADER];
-
-    if (!_.isMatch(_.keys(shaderSet), scriptTypes)) {
+    if (!_.isMatch(_.keys(shaderSet), Sur.SCRIPT_TYPES)) {
       throw new Error(
         'Missing shader! Shader sets require both a vertex and a fragment ' +
         'shader'
       );
     }
 
-    _.each(_.zip(scriptTypes, shaderTypes), function(type) {
+    var shaderTypes = [gl.VERTEX_SHADER, gl.FRAGMENT_SHADER];
+
+    _.each(_.zip(Sur.SCRIPT_TYPES, shaderTypes), function(type) {
       var shaderId = Sur.compileShader(gl, shaderSet[type[0]].text, type[1]);
       shaderSet[type[0]].shader = shaderId;
     });
 
     Sur.linkProgram(gl, shaderSet);
+    Sur.bakeProgramParameters(gl, shaderSet);
   };
 
   Sur.compileShaderSets = function(gl, shaderSets) {
@@ -121,8 +169,5 @@
   };
 
   window.Sur = Sur;
-  if (!window.hasOwnProperty('S')) {
-    window.S = Sur;
-  }
 
 })();

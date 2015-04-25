@@ -1,0 +1,37 @@
+{
+  "name": "sur",
+  "main": "sur.js",
+  "version": "0.1.0",
+  "homepage": "https://github.com/bdero/sur",
+  "authors": [
+    "Brandon DeRosier <x@bdero.me>"
+  ],
+  "description": "Simple Unobtrusive Rasterization",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "webgl",
+    "rasterization",
+    "library"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "vendor",
+    "node_modules",
+    ".bowerrc",
+    ".gitignore",
+    "tests",
+    "package.json"
+    "examples"
+  ],
+  "dependencies": {
+    "lodash": "~3.7.0",
+    "gl-matrix": "~2.2.1"
+  },
+  "devDependencies": {
+    "blanket": "~1.1.5",
+    "jquery": "~2.1.3",
+    "qunit": "~1.18.0"
+  }
+}
