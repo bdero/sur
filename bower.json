@@ -22,7 +22,7 @@
     ".bowerrc",
     ".gitignore",
     "tests",
-    "package.json"
+    "package.json",
     "examples"
   ],
   "dependencies": {
