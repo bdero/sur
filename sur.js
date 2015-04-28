@@ -14,9 +14,9 @@
    * @constructor
    * @param {Object} canvas - The canvas element from which to initialize a
    *  WebGL context.
-   * @param {boolean} [initShaders=true] Whether or not to fetch, compile, link,
-   *  and gather metadata about shader programs.
-   * @returns {Object} Returns the new `Sur` instance.
+   * @param {boolean} [initShaders=true] -  Whether or not to fetch, compile,
+   *  link, and gather metadata about shader programs.
+   * @returns {Object} - Returns the new `Sur` instance.
    * @example
    *
    * var canvas = document.getElementById('#canvas');
@@ -175,14 +175,37 @@
    * @param {updateCallback} callback - Callback called for every update.
    * @example
    *
+   * // Calculate velocity and position on a units/second basis
    * Sur.update(function(delta) {
    *   velocity += acceleration*delta;
    *   position += velocity*delta;
    *
    *   // ... render scene ...
    * });
+   *
+   * // Stop the loop after 20 frames
+   * var frame = 0;
+   * Sur.update(function() {
+   *   console.debug(++frame);
+   *   return frame < 20;
+   * });
    */
   Sur.update = function(callback) {
+    var currentTime = Date.now();
+    var previousTime;
+
+    var loop = function() {
+      previousTime = currentTime;
+      currentTime = Date.now();
+      var delta = (currentTime - previousTime)/1000;
+
+      // If the callback returns anything except false, continue running
+      if (callback(delta) !== false) {
+        requestAnimationFrame(loop);
+      }
+    };
+
+    loop();
   };
 
   /**
@@ -191,6 +214,9 @@
    * @callback updateCallback
    * @param {number} delta - The amount of time, in seconds, elapsed since the
    *  last update call.
+   * @returns {boolean} continue - Returns whether or not to continue executing
+   *  the callback loop. Any return value other than `false` will result in the
+   *  loop continuing execution (including no return value or `undefined`).
    */
 
   // Place Sur into the global scope
