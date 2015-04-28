@@ -168,6 +168,32 @@
     });
   };
 
+  /**
+   * Starts an update loop using requestAnimationFrame, passing the callback a
+   * delta time multiplier.
+   *
+   * @param {updateCallback} callback - Callback called for every update.
+   * @example
+   *
+   * Sur.update(function(delta) {
+   *   velocity += acceleration*delta;
+   *   position += velocity*delta;
+   *
+   *   // ... render scene ...
+   * });
+   */
+  Sur.update = function(callback) {
+  };
+
+  /**
+   * Called on every requestAnimationFrame tick.
+   *
+   * @callback updateCallback
+   * @param {number} delta - The amount of time, in seconds, elapsed since the
+   *  last update call.
+   */
+
+  // Place Sur into the global scope
   window.Sur = Sur;
 
 })();
