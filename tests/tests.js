@@ -1,4 +1,4 @@
-QUnit.module('basic construction', {
+QUnit.module('construction and utilities', {
   beforeEach: function() {
     this.canvas = $('<canvas>')[0];
   }
@@ -14,6 +14,32 @@ QUnit.test('construct Sur object with initShaders=false', function(assert) {
   assert.ok(_.isObject(sur), 'object returned from Sur');
   assert.ok(sur.hasOwnProperty('shaderSets'), 'has shaderSets property');
   assert.propEqual(sur.shaderSets, {}, 'sur.shaderSets is empty');
+});
+
+QUnit.test('run a Sur.update loop', function(assert) {
+  var done = assert.async();
+
+  var frame = 0;
+  Sur.update(function(delta) {
+    console.debug(frame, delta);
+
+    assert.ok(
+      delta >= 0 && delta < 1,
+      'delta time multiplier is reasonable (>= 0 and < 1): ' + delta
+    );
+    assert.ok(
+      frame <= 10,
+      'the frame multipler is less than 10, as expected: ' + frame
+    );
+
+    if (frame === 10) {
+      done();
+    }
+
+    // When the loop exceeds 10, it will return false, which should break
+    // the callback loop
+    return ++frame <= 10;
+  });
 });
 
 
