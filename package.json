@@ -24,7 +24,7 @@
     "library"
   ],
   "author": "Brandon DeRosier <x@bdero.me>",
-  "license": "MIT",
+  "license": "GNU GPLv3",
   "bugs": {
     "url": "https://github.com/bdero/sur/issues"
   },

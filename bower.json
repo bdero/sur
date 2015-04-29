@@ -15,7 +15,7 @@
     "rasterization",
     "library"
   ],
-  "license": "MIT",
+  "license": "GNU GPLv3",
   "ignore": [
     "vendor",
     "node_modules",
