@@ -19,6 +19,67 @@
 ;(function() {
 
   /**
+   * Creates a `Program` object which represents and stores the state of a WebGL
+   * shader program.
+   *
+   * @static
+   * @memberOf Sur
+   * @constructor
+   * @param {string} vertexText - The vertex shader text to use.
+   * @param {string} fragmentText - The fragment shader text to use.
+   * @param {boolean} [initialize=true] - Whether or not to compile the shaders,
+   *  link the program, and obtain metadata about the program.
+   * @example
+   *
+   * var program = new Sur.Program(vertexText, fragmentText);
+   */
+  function Program(vertexText, fragmentText, initialize) {
+    initialize = initialize || true;
+
+    this.setShaders(vertexText, fragmentText, initialize);
+  }
+
+  /**
+   * Sets the vertex and fragment shader of the program.
+   *
+   * @param {string} vertexText - The vertex shader text to use.
+   * @param {string} fragmentText - The fragment shader text to use.
+   * @param {boolean} [initialize=true] - Whether or not to compile the shaders,
+   *  link the program, and obtain metadata about the program.
+   * @example
+   *
+   * var program = new Sur.Program(vertexText, fragmentText);
+   *
+   * program.setShaders(otherVertexText, otherFragmentText);
+   */
+  Program.prototype.setShaders = function(
+    vertexText, fragmentText, initialize
+  ) {
+    initialize = initialize || true;
+
+    this.vertexText = vertexText;
+    this.fragmentText = fragmentText;
+
+    if (initialize) {
+      this.compile();
+      this.link();
+      this.reflect();
+    }
+  };
+
+  Program.prototype.compile = function() {
+
+  };
+
+  Program.prototype.link = function() {
+
+  };
+
+  Program.prototype.reflect = function() {
+
+  };
+
+  /**
    * Creates a `Sur` object which initializes a WebGL context and keeps track
    * of WebGL state for a given canvas object.
    *
@@ -26,9 +87,9 @@
    * @constructor
    * @param {Object} canvas - The canvas element from which to initialize a
    *  WebGL context.
-   * @param {boolean} [initShaders=true] -  Whether or not to fetch, compile,
+   * @param {boolean} [initShaders=true] - Whether or not to fetch, compile,
    *  link, and gather metadata about shader programs.
-   * @returns {Object} - Returns the new `Sur` instance.
+   * @returns {Object} Returns the new `Sur` instance.
    * @example
    *
    * var canvas = document.getElementById('#canvas');
@@ -184,6 +245,8 @@
    * Starts an update loop using requestAnimationFrame, passing the callback a
    * delta time multiplier.
    *
+   * @static
+   * @memberOf Sur
    * @param {updateCallback} callback - Callback called for every update.
    * @example
    *
@@ -226,11 +289,13 @@
    * @callback updateCallback
    * @param {number} delta - The amount of time, in seconds, elapsed since the
    *  last update call.
-   * @returns {boolean} continue - Returns whether or not to continue executing
-   *  the callback loop. Any return value other than `false` will result in the
+   * @returns {boolean} Returns whether or not to continue executing the
+   *  callback loop. Any return value other than `false` will result in the
    *  loop continuing execution (including no return value or `undefined`).
+   * @see Sur.update
    */
 
+  Sur.Program = Program;
   // Place Sur into the global scope
   window.Sur = Sur;
 
