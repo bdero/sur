@@ -36,7 +36,7 @@
    * var program = new Sur.Program(vertexText, fragmentText);
    */
   function Program(gl, vertexText, fragmentText, initialize) {
-    initialize = initialize || true;
+    initialize = _.isBoolean(initialize) ? initialize : true;
 
     /**
      * The WebGL rendering context with which to compile shaders and link the
@@ -140,7 +140,7 @@
   Program.prototype.setShaders = function(
     vertexText, fragmentText, initialize
   ) {
-    initialize = initialize || true;
+    initialize = _.isBoolean(initialize) ? initialize : true;
 
     this.vertexText = vertexText;
     this.fragmentText = fragmentText;
@@ -223,8 +223,38 @@
     this.program = result;
   };
 
+  /**
+   * Retrieve attribute and uniform mappings from the program, which will be
+   * stored into the `attributes` and `uniforms` properties respectively.
+   *
+   * @see Sur.Program#uniforms
+   * @see Sur.Program#attributes
+   */
   Program.prototype.reflect = function() {
+    var parameters = [
+      ['attributes', this.gl.ACTIVE_ATTRIBUTES, 'Attrib'],
+      ['uniforms', this.gl.ACTIVE_UNIFORMS, 'Uniform'],
+    ];
 
+    _.each(parameters, function(parameter) {
+      var parameterCount = this.gl.getProgramParameter(
+        this.program,
+        parameter[1]
+      );
+
+      this[parameter[0]] = _.zipObject(
+        _.times(parameterCount, function(count) {
+          var parameterName = this.gl['getActive' + parameter[2]](
+            this.program, count
+          ).name;
+          var parameterValue = this.gl['get' + parameter[2] + 'Location'](
+            this.program, parameterName
+          );
+
+          return [parameterName, parameterValue];
+        })
+      );
+    });
   };
 
 
