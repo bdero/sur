@@ -21,8 +21,6 @@ QUnit.test('run a Sur.update loop', function(assert) {
 
   var frame = 0;
   Sur.update(function(delta) {
-    console.debug(frame, delta);
-
     assert.ok(
       delta >= 0 && delta < 1,
       'delta time multiplier is reasonable (>= 0 and < 1): ' + delta
@@ -39,6 +37,80 @@ QUnit.test('run a Sur.update loop', function(assert) {
     // When the loop exceeds 10, it will return false, which should break
     // the callback loop
     return ++frame <= 10;
+  });
+});
+
+
+QUnit.module('Sur.Program', {
+  beforeEach: function() {
+    var canvas = $('<canvas>')[0];
+
+    this.gl = canvas.getContext('webgl') ||
+              canvas.getContext('experimental-webgl');
+
+    this.vertexText = "\
+      attribute vec4 aPosition;\
+      \
+      void main() {\
+        gl_Position = aPosition;\
+        gl_PointSize = 10.0;\
+      }\
+    ";
+    this.fragmentText = "\
+      precision mediump float;\
+      uniform vec4 uFragColor;\
+      \
+      void main() {\
+        gl_FragColor = uFragColor;\
+      }\
+    ";
+  }
+});
+
+QUnit.test('construct a Program without compiling shaders', function(assert) {
+  var program = new Sur.Program(this.gl, 'vertex', 'fragment', false);
+
+  assert.equal(
+    program.vertexText,
+    'vertex',
+    'vertex shader text assigned properly'
+  );
+  assert.equal(
+    program.fragmentText,
+    'fragment',
+    'fragment shader text assigned properly'
+  );
+});
+
+QUnit.test('compile shader without errors', function(assert) {
+  var program = new Sur.Program(
+    this.gl, this.vertexText, this.fragmentText, false
+  );
+
+  program.compileShader(true);
+  assert.ok(
+    _.isObject(program.vertex),
+    'vertex shader compiled and stored'
+  );
+
+  program.compileShader(false);
+  assert.ok(
+    _.isObject(program.fragment),
+    'fragment shader compiled and stored'
+  );
+});
+
+QUnit.test('compile shader with errors', function(assert) {
+  var program = new Sur.Program(
+    this.gl, 'invalid shader', 'not a chance', false
+  );
+
+  _.each([true, false], function(isVertexShader) {
+    assert.throws(
+      _.bind(program.compileShader, program, isVertexShader),
+      /Shader compilation error/,
+      'raised a shader compilation error'
+    );
   });
 });
 
