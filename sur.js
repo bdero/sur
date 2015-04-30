@@ -159,7 +159,7 @@
    * @param {boolean} isVertexShader - Whether to compile the vertex shader or,
    *  if not, compile the fragment shader.
    * @throws Throws an error if the shader couldn't be compiled. The WebGL
-   *  shader info log is included in the error message.
+   *  shader info log is included as part of the error message.
    * @see Sur.Program#vertex
    * @see Sur.Program#fragment
    */
@@ -183,12 +183,44 @@
     this[isVertexShader ? 'vertex' : 'fragment'] = result;
   };
 
+  /**
+   * Compile both the vertex and fragment shader, which will result in the
+   * shaders being saved into the `vertex` and `fragment` properties
+   * respectively.
+   *
+   * @throws Throws an error if either of the shaders couldn't be compiled.
+   *  The WebGL shader info log is included as part of the error message.
+   * @see Sur.Program#compileShader
+   * @see Sur.Program#vertex
+   * @see Sur.Program#fragment
+   */
   Program.prototype.compile = function() {
-
+    this.compileShader(true);
+    this.compileShader(false);
   };
 
+  /**
+   * Link the vertex and fragment shaders into a program, which will be saved
+   * into the `program` property.
+   *
+   * @throws Throws an error if the program couldn't be linked. The WebGL
+   *  program info log is included as part of the error message.
+   * @see Sur.Program#program
+   */
   Program.prototype.link = function() {
+    var result = this.gl.createProgram();
 
+    this.gl.attachShader(result, this.vertex);
+    this.gl.attachShader(result, this.fragment);
+    this.gl.linkProgram(result);
+
+    if (!this.gl.getProgramParameter(result, this.gl.LINK_STATUS)) {
+      throw new Error(
+        "Program link error; " + this.gl.getProgramInfoLog(result)
+      );
+    }
+
+    this.program = result;
   };
 
   Program.prototype.reflect = function() {
