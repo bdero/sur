@@ -25,6 +25,8 @@
    * @static
    * @memberOf Sur
    * @constructor
+   * @param {WebGLRenderingContext} gl - The WebGL rendering context with which
+   *  to compile the shaders and link the program.
    * @param {string} vertexText - The vertex shader text to use.
    * @param {string} fragmentText - The fragment shader text to use.
    * @param {boolean} [initialize=true] - Whether or not to compile the shaders,
@@ -33,8 +35,91 @@
    *
    * var program = new Sur.Program(vertexText, fragmentText);
    */
-  function Program(vertexText, fragmentText, initialize) {
+  function Program(gl, vertexText, fragmentText, initialize) {
     initialize = initialize || true;
+
+    /**
+     * The WebGL rendering context with which to compile shaders and link the
+     * program.
+     *
+     * @readonly
+     * @name Sur.Program#gl
+     * @type WebGLRenderingContext
+     */
+    this.gl = gl;
+
+    /**
+     * The text of the vertex shader.
+     *
+     * @readonly
+     * @name Sur.Program#vertexText
+     * @type string
+     */
+
+    /**
+     * The text of the fragment shader.
+     *
+     * @readonly
+     * @name Sur.Program#fragmentText
+     * @type string
+     */
+
+    // vertexText and fragmentText are initialized by the call to setShaders
+    // below.
+
+    /**
+     * The compiled WebGL vertex shader.
+     *
+     * @readonly
+     * @name Sur.Program#vertex
+     * @default null
+     * @type WebGLShader
+     */
+    this.vertex = null;
+
+    /**
+     * The compiled WebGL fragment shader.
+     *
+     * @readonly
+     * @name Sur.Program#fragment
+     * @default null
+     * @type WebGLShader
+     */
+    this.fragment = null;
+
+    /**
+     * The linked WebGL program.
+     *
+     * @readonly
+     * @name Sur.Program#program
+     * @default null
+     * @type WebGLProgram
+     */
+    this.program = null;
+
+    /**
+     * Object mapping of program attribute parameter names to their respective
+     * parameter indexes. This can effectively be used as an enum to increase
+     * readability of code when dealing with shader parameters.
+     *
+     * @readonly
+     * @name Sur.Program#attributes
+     * @default {}
+     * @type Object
+     */
+    this.attributes = {};
+
+    /**
+     * Object mapping of program uniform parameter names to their respective
+     * WebGLUniformLocations. This can effectively be used as an enum to
+     * increase readability of code when dealing with shader parameters.
+     *
+     * @readonly
+     * @name Sur.Program#uniforms
+     * @default {}
+     * @type Object
+     */
+    this.uniforms = {};
 
     this.setShaders(vertexText, fragmentText, initialize);
   }
@@ -67,6 +152,37 @@
     }
   };
 
+  /**
+   * Compile one of the shaders, storing the result into the shader's respective
+   * `Program` property.
+   *
+   * @param {boolean} isVertexShader - Whether to compile the vertex shader or,
+   *  if not, compile the fragment shader.
+   * @throws Throws an error if the shader couldn't be compiled. The WebGL
+   *  shader info log is included in the error message.
+   * @see Sur.Program#vertex
+   * @see Sur.Program#fragment
+   */
+  Program.prototype.compileShader = function(isVertexShader) {
+    var result = this.gl.createShader(
+      isVertexShader ? this.gl.VERTEX_SHADER : this.gl.FRAGMENT_SHADER
+    );
+
+    this.gl.shaderSource(
+      result,
+      isVertexShader ? this.vertexText : this.fragmentText
+    );
+    this.gl.compileShader(result);
+
+    if (!this.gl.getShaderParameter(result, this.gl.COMPILE_STATUS)) {
+      throw new Error(
+        "Shader compilation error; " + this.gl.getShaderInfoLog(result)
+      );
+    }
+
+    this[isVertexShader ? 'vertex' : 'fragment'] = result;
+  };
+
   Program.prototype.compile = function() {
 
   };
@@ -79,11 +195,13 @@
 
   };
 
+
   /**
    * Creates a `Sur` object which initializes a WebGL context and keeps track
    * of WebGL state for a given canvas object.
    *
    * @name Sur
+   * @global
    * @constructor
    * @param {Object} canvas - The canvas element from which to initialize a
    *  WebGL context.
