@@ -1,6 +1,6 @@
 /**
  * @license
- * sur 0.1.0 <https://github.com/bdero/sur/>
+ * sur 0.1.1 <https://github.com/bdero/sur/>
  * Copyright (C) 2015  Brandon DeRosier
  *
  * This program is free software: you can redistribute it and/or modify
