@@ -1,8 +1,20 @@
 /**
  * @license
- * sur 0.0.0 <https://github.com/bdero/sur/>
- * Copyright 2015 Brandon DeRosier
- * Available under MIT license <https://github.com/bdero/sur/blob/master/LICENSE.md>
+ * sur 0.1.1 <https://github.com/bdero/sur/>
+ * Copyright (C) 2015  Brandon DeRosier
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 ;(function() {
 
@@ -14,9 +26,9 @@
    * @constructor
    * @param {Object} canvas - The canvas element from which to initialize a
    *  WebGL context.
-   * @param {boolean} [initShaders=true] Whether or not to fetch, compile, link,
-   *  and gather metadata about shader programs.
-   * @returns {Object} Returns the new `Sur` instance.
+   * @param {boolean} [initShaders=true] -  Whether or not to fetch, compile,
+   *  link, and gather metadata about shader programs.
+   * @returns {Object} - Returns the new `Sur` instance.
    * @example
    *
    * var canvas = document.getElementById('#canvas');
@@ -168,6 +180,58 @@
     });
   };
 
+  /**
+   * Starts an update loop using requestAnimationFrame, passing the callback a
+   * delta time multiplier.
+   *
+   * @param {updateCallback} callback - Callback called for every update.
+   * @example
+   *
+   * // Calculate velocity and position on a units/second basis
+   * Sur.update(function(delta) {
+   *   velocity += acceleration*delta;
+   *   position += velocity*delta;
+   *
+   *   // ... render scene ...
+   * });
+   *
+   * // Stop the loop after 20 frames
+   * var frame = 0;
+   * Sur.update(function() {
+   *   console.debug(++frame);
+   *   return frame < 20;
+   * });
+   */
+  Sur.update = function(callback) {
+    var currentTime = Date.now();
+    var previousTime;
+
+    var loop = function() {
+      previousTime = currentTime;
+      currentTime = Date.now();
+      var delta = (currentTime - previousTime)/1000;
+
+      // If the callback returns anything except false, continue running
+      if (callback(delta) !== false) {
+        requestAnimationFrame(loop);
+      }
+    };
+
+    loop();
+  };
+
+  /**
+   * Called on every requestAnimationFrame tick.
+   *
+   * @callback updateCallback
+   * @param {number} delta - The amount of time, in seconds, elapsed since the
+   *  last update call.
+   * @returns {boolean} continue - Returns whether or not to continue executing
+   *  the callback loop. Any return value other than `false` will result in the
+   *  loop continuing execution (including no return value or `undefined`).
+   */
+
+  // Place Sur into the global scope
   window.Sur = Sur;
 
 })();
