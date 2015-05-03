@@ -236,19 +236,20 @@
       ['uniforms', this.gl.ACTIVE_UNIFORMS, 'Uniform'],
     ];
 
+    var that = this;
     _.each(parameters, function(parameter) {
-      var parameterCount = this.gl.getProgramParameter(
-        this.program,
+      var parameterCount = that.gl.getProgramParameter(
+        that.program,
         parameter[1]
       );
 
-      this[parameter[0]] = _.zipObject(
+      that[parameter[0]] = _.zipObject(
         _.times(parameterCount, function(count) {
-          var parameterName = this.gl['getActive' + parameter[2]](
-            this.program, count
+          var parameterName = that.gl['getActive' + parameter[2]](
+            that.program, count
           ).name;
-          var parameterValue = this.gl['get' + parameter[2] + 'Location'](
-            this.program, parameterName
+          var parameterValue = that.gl['get' + parameter[2] + 'Location'](
+            that.program, parameterName
           );
 
           return [parameterName, parameterValue];

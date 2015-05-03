@@ -100,6 +100,61 @@ QUnit.test('compile shader without errors', function(assert) {
   );
 });
 
+QUnit.test('use compile to compile both shaders', function(assert) {
+  var program = new Sur.Program(
+    this.gl, this.vertexText, this.fragmentText, false
+  );
+
+  program.compile();
+
+  assert.ok(
+    _.isObject(program.vertex),
+    'vertex shader compiled and stored'
+  );
+
+  assert.ok(
+    _.isObject(program.fragment),
+    'fragment shader compiled and stored'
+  );
+});
+
+QUnit.test('link the program', function(assert) {
+  var program = new Sur.Program(
+    this.gl, this.vertexText, this.fragmentText, false
+  );
+
+  program.compile();
+  program.link();
+
+  assert.ok(
+    _.isObject(program.program),
+    'vertex shader compiled and stored'
+  );
+});
+
+QUnit.test('do program reflection', function(assert) {
+  var program = new Sur.Program(
+    this.gl, this.vertexText, this.fragmentText, false
+  );
+
+  program.compile();
+  program.link();
+  program.reflect();
+
+  console.debug(program.program);
+  assert.propEqual(
+    program.attributes,
+    { 'aPosition': 0 },
+    'vertex shader compiled and stored'
+  );
+
+  assert.propEqual(
+    program.uniforms,
+    { 'uFragColor': {} },
+    'vertex shader compiled and stored'
+  );
+});
+
 QUnit.test('compile shader with errors', function(assert) {
   var program = new Sur.Program(
     this.gl, 'invalid shader', 'not a chance', false
@@ -113,7 +168,6 @@ QUnit.test('compile shader with errors', function(assert) {
     );
   });
 });
-
 
 QUnit.module('shader pipeline', {
   beforeEach: function() {
