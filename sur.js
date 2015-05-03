@@ -19,16 +19,258 @@
 ;(function() {
 
   /**
+   * Creates a `Program` object which represents and stores the state of a WebGL
+   * shader program.
+   *
+   * @static
+   * @memberOf Sur
+   * @constructor
+   * @param {WebGLRenderingContext} gl - The WebGL rendering context with which
+   *  to compile the shaders and link the program.
+   * @param {string} vertexText - The vertex shader text to use.
+   * @param {string} fragmentText - The fragment shader text to use.
+   * @param {boolean} [initialize=true] - Whether or not to compile the shaders,
+   *  link the program, and obtain metadata about the program.
+   * @example
+   *
+   * var program = new Sur.Program(vertexText, fragmentText);
+   */
+  function Program(gl, vertexText, fragmentText, initialize) {
+    initialize = _.isBoolean(initialize) ? initialize : true;
+
+    /**
+     * The WebGL rendering context with which to compile shaders and link the
+     * program.
+     *
+     * @readonly
+     * @name Sur.Program#gl
+     * @type WebGLRenderingContext
+     */
+    this.gl = gl;
+
+    /**
+     * The text of the vertex shader.
+     *
+     * @readonly
+     * @name Sur.Program#vertexText
+     * @type string
+     */
+
+    /**
+     * The text of the fragment shader.
+     *
+     * @readonly
+     * @name Sur.Program#fragmentText
+     * @type string
+     */
+
+    // vertexText and fragmentText are initialized by the call to setShaders
+    // below.
+
+    /**
+     * The compiled WebGL vertex shader.
+     *
+     * @readonly
+     * @name Sur.Program#vertex
+     * @default null
+     * @type WebGLShader
+     */
+    this.vertex = null;
+
+    /**
+     * The compiled WebGL fragment shader.
+     *
+     * @readonly
+     * @name Sur.Program#fragment
+     * @default null
+     * @type WebGLShader
+     */
+    this.fragment = null;
+
+    /**
+     * The linked WebGL program.
+     *
+     * @readonly
+     * @name Sur.Program#program
+     * @default null
+     * @type WebGLProgram
+     */
+    this.program = null;
+
+    /**
+     * Object mapping of program attribute parameter names to their respective
+     * parameter indexes. This can effectively be used as an enum to increase
+     * readability of code when dealing with shader parameters.
+     *
+     * @readonly
+     * @name Sur.Program#attributes
+     * @default {}
+     * @type Object
+     */
+    this.attributes = {};
+
+    /**
+     * Object mapping of program uniform parameter names to their respective
+     * WebGLUniformLocations. This can effectively be used as an enum to
+     * increase readability of code when dealing with shader parameters.
+     *
+     * @readonly
+     * @name Sur.Program#uniforms
+     * @default {}
+     * @type Object
+     */
+    this.uniforms = {};
+
+    this.setShaders(vertexText, fragmentText, initialize);
+  }
+
+  /**
+   * Sets the vertex and fragment shader of the program.
+   *
+   * @param {string} vertexText - The vertex shader text to use.
+   * @param {string} fragmentText - The fragment shader text to use.
+   * @param {boolean} [initialize=true] - Whether or not to compile the shaders,
+   *  link the program, and obtain metadata about the program.
+   * @example
+   *
+   * var program = new Sur.Program(vertexText, fragmentText);
+   *
+   * program.setShaders(otherVertexText, otherFragmentText);
+   */
+  Program.prototype.setShaders = function(
+    vertexText, fragmentText, initialize
+  ) {
+    initialize = _.isBoolean(initialize) ? initialize : true;
+
+    this.vertexText = vertexText;
+    this.fragmentText = fragmentText;
+
+    if (initialize) {
+      this.compile();
+      this.link();
+      this.reflect();
+    }
+  };
+
+  /**
+   * Compile one of the shaders, storing the result into the shader's respective
+   * `Program` property.
+   *
+   * @param {boolean} isVertexShader - Whether to compile the vertex shader or,
+   *  if not, compile the fragment shader.
+   * @throws Throws an error if the shader couldn't be compiled. The WebGL
+   *  shader info log is included as part of the error message.
+   * @see Sur.Program#vertex
+   * @see Sur.Program#fragment
+   */
+  Program.prototype.compileShader = function(isVertexShader) {
+    var result = this.gl.createShader(
+      isVertexShader ? this.gl.VERTEX_SHADER : this.gl.FRAGMENT_SHADER
+    );
+
+    this.gl.shaderSource(
+      result,
+      isVertexShader ? this.vertexText : this.fragmentText
+    );
+    this.gl.compileShader(result);
+
+    if (!this.gl.getShaderParameter(result, this.gl.COMPILE_STATUS)) {
+      throw new Error(
+        "Shader compilation error; " + this.gl.getShaderInfoLog(result)
+      );
+    }
+
+    this[isVertexShader ? 'vertex' : 'fragment'] = result;
+  };
+
+  /**
+   * Compile both the vertex and fragment shader, which will result in the
+   * shaders being saved into the `vertex` and `fragment` properties
+   * respectively.
+   *
+   * @throws Throws an error if either of the shaders couldn't be compiled.
+   *  The WebGL shader info log is included as part of the error message.
+   * @see Sur.Program#compileShader
+   * @see Sur.Program#vertex
+   * @see Sur.Program#fragment
+   */
+  Program.prototype.compile = function() {
+    this.compileShader(true);
+    this.compileShader(false);
+  };
+
+  /**
+   * Link the vertex and fragment shaders into a program, which will be saved
+   * into the `program` property.
+   *
+   * @throws Throws an error if the program couldn't be linked. The WebGL
+   *  program info log is included as part of the error message.
+   * @see Sur.Program#program
+   */
+  Program.prototype.link = function() {
+    var result = this.gl.createProgram();
+
+    this.gl.attachShader(result, this.vertex);
+    this.gl.attachShader(result, this.fragment);
+    this.gl.linkProgram(result);
+
+    if (!this.gl.getProgramParameter(result, this.gl.LINK_STATUS)) {
+      throw new Error(
+        "Program link error; " + this.gl.getProgramInfoLog(result)
+      );
+    }
+
+    this.program = result;
+  };
+
+  /**
+   * Retrieve attribute and uniform mappings from the program, which will be
+   * stored into the `attributes` and `uniforms` properties respectively.
+   *
+   * @see Sur.Program#uniforms
+   * @see Sur.Program#attributes
+   */
+  Program.prototype.reflect = function() {
+    var parameters = [
+      ['attributes', this.gl.ACTIVE_ATTRIBUTES, 'Attrib'],
+      ['uniforms', this.gl.ACTIVE_UNIFORMS, 'Uniform'],
+    ];
+
+    var that = this;
+    _.each(parameters, function(parameter) {
+      var parameterCount = that.gl.getProgramParameter(
+        that.program,
+        parameter[1]
+      );
+
+      that[parameter[0]] = _.zipObject(
+        _.times(parameterCount, function(count) {
+          var parameterName = that.gl['getActive' + parameter[2]](
+            that.program, count
+          ).name;
+          var parameterValue = that.gl['get' + parameter[2] + 'Location'](
+            that.program, parameterName
+          );
+
+          return [parameterName, parameterValue];
+        })
+      );
+    });
+  };
+
+
+  /**
    * Creates a `Sur` object which initializes a WebGL context and keeps track
    * of WebGL state for a given canvas object.
    *
    * @name Sur
+   * @global
    * @constructor
    * @param {Object} canvas - The canvas element from which to initialize a
    *  WebGL context.
-   * @param {boolean} [initShaders=true] -  Whether or not to fetch, compile,
+   * @param {boolean} [initShaders=true] - Whether or not to fetch, compile,
    *  link, and gather metadata about shader programs.
-   * @returns {Object} - Returns the new `Sur` instance.
+   * @returns {Object} Returns the new `Sur` instance.
    * @example
    *
    * var canvas = document.getElementById('#canvas');
@@ -184,6 +426,8 @@
    * Starts an update loop using requestAnimationFrame, passing the callback a
    * delta time multiplier.
    *
+   * @static
+   * @memberOf Sur
    * @param {updateCallback} callback - Callback called for every update.
    * @example
    *
@@ -226,11 +470,13 @@
    * @callback updateCallback
    * @param {number} delta - The amount of time, in seconds, elapsed since the
    *  last update call.
-   * @returns {boolean} continue - Returns whether or not to continue executing
-   *  the callback loop. Any return value other than `false` will result in the
+   * @returns {boolean} Returns whether or not to continue executing the
+   *  callback loop. Any return value other than `false` will result in the
    *  loop continuing execution (including no return value or `undefined`).
+   * @see Sur.update
    */
 
+  Sur.Program = Program;
   // Place Sur into the global scope
   window.Sur = Sur;
 
